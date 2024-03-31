@@ -24,6 +24,8 @@ class GUI2:
         self.PURPLE_COLOR  ='darkorchid1'
         self.GREEN_COLOR = (81, 124, 87)
         self.BACKGROUND_COLOR = (72, 67, 64)
+        self.NODE_EXPANDED_COLOR = (63, 212, 255)
+        self.NODE_CREATED_COLOR = (253, 255, 44)
          
         #
         self.all_moviements=[]
@@ -68,7 +70,7 @@ class GUI2:
                     matriz_.append(row)            
                 self.matriz = np.array(matriz_)     
             self.calculateScreen()#calculo las dimensiones de la matrix con relacion a la pantalla 
-            self.mappingMatrixOnScreen()   #defino el tamano del juego en base a la matrix leida    
+            self.mappingMatrizOnScreen()   #defino el tamano del juego en base a la matrix leida    
         except FileNotFoundError as e:
             self.info_text = 'La matriz no existe'
 
@@ -98,14 +100,14 @@ class GUI2:
         self.agent_icon_rigth = pygame.transform.rotate(self.agent_icon,280) 
         self.agent_icon_down = pygame.transform.rotate(self.agent_icon,180) 
         
-    def mappingMatrixOnScreen(self):
+    def mappingMatrizOnScreen(self):
         if self.matriz is None :return       
         self.screen.fill(self.BACKGROUND_COLOR)#limpio la pantalla
         
         r= (self.HEIGHT-60- self.dimention_y_used)/2
         c= (self.WIDTH- self.dimention_x_used)/2
         
-        #mapeo la matrix en la pantalla recorriendo filas y columnas y creando su correspondiebte elemento            
+        #mapeo la matriz en la pantalla recorriendo filas y columnas y creando su correspondiente elemento            
         for i in range(self.matriz.shape[0]):
             for j in range(self.matriz.shape[1]):
                 elem = self.matriz[i,j]              
@@ -153,11 +155,32 @@ class GUI2:
 
     def putTextOnScreen(self):     
         pygame.draw.rect(self.screen,self.BLACK_COLOR,(0,self.HEIGHT-100,self.WIDTH,100))
-        pygame.draw.rect(self.screen,self.BLACK_COLOR,(0,0,self.WIDTH,40))       
-        
+        pygame.draw.rect(self.screen,self.BLACK_COLOR,(0,0,self.WIDTH,40))      
+
         label_text = pygame.font.SysFont("Verdana", 20)
         label_min = pygame.font.SysFont("Verdana", 18)
         text_date = pygame.font.SysFont("Verdana", 16)
+
+        #informacion de elementos
+        #JUGADOR
+        pygame.draw.circle(self.screen,self.WHITE_COLOR,(20,20),10)
+        self.screen.blit(label_min.render('Jugador',1,self.WHITE_COLOR),(40,8))
+        #DESTINO
+        pygame.draw.circle(self.screen,self.RED_COLOR,(130,20),10)
+        self.screen.blit(label_min.render('Destino',1,self.WHITE_COLOR),(150,8))
+        
+        #LASER
+        pygame.draw.rect(self.screen,self.RED_COLOR,(240,10,5,20),10)
+        self.screen.blit(label_min.render('Laser',1,self.WHITE_COLOR),(255,8))
+        
+        #NODE EXPANDED
+        pygame.draw.rect(self.screen,self.NODE_EXPANDED_COLOR,(320,10,20,20),10)
+        self.screen.blit(label_min.render('Expandido',1,self.WHITE_COLOR),(350,8))
+        
+        #NODE EXPANDED
+        pygame.draw.rect(self.screen,self.NODE_CREATED_COLOR,(460,10,20,20),10)
+        self.screen.blit(label_min.render('Creado',1,self.WHITE_COLOR),(490,8))
+
                
         self.label_tittle_info = label_text.render(str(self.info_text),1,(252, 251, 252))
         self.label_matriz_info = label_text.render(str(self.info_matrix),1,(252, 251, 252))             
@@ -187,8 +210,8 @@ class GUI2:
         self.text_depth_bfs = label_min.render(str(self.depth_bfs),1,self.GREEN_COLOR)
                 
 
-        #subtitulossacascad
-        self.screen.blit(self.label_tittle_info,((self.WIDTH/2)-50,10))
+        #subtitulos
+        self.screen.blit(self.label_tittle_info,((self.WIDTH/2)-5,8))
         self.screen.blit(self.label_matriz_info,(self.WIDTH-100,10))
         self.screen.blit(self.label_nodes_expanded,(70,self.HEIGHT-95))
         self.screen.blit(self.label_nodes_created,(210,self.HEIGHT-95))
@@ -288,9 +311,9 @@ class GUI2:
             x_block = coordenate[0]*self.width_block
             y_block = coordenate[1]*self.width_block
             if(isExpanded):
-                pygame.draw.rect(self.screen,(201, 142, 70),(self.space_x+x_block,40+self.space_y+y_block,self.width_block,self.width_block))
+                pygame.draw.rect(self.screen,self.NODE_EXPANDED_COLOR,(self.space_x+x_block,40+self.space_y+y_block,self.width_block,self.width_block))
             else:
-                pygame.draw.rect(self.screen,(218, 0, 0),(self.space_x+x_block,40+self.space_y+y_block,self.width_block,self.width_block))
+                pygame.draw.rect(self.screen,self.NODE_CREATED_COLOR,(self.space_x+x_block,40+self.space_y+y_block,self.width_block,self.width_block))
       
             sleep(self.time_animation)
         self.animation = False
@@ -415,7 +438,7 @@ class GUI2:
                            
             if not self.animation and self.info_matrix is not None and  pygame.key.get_pressed()[pygame.K_a]:#ejecutar A*
                 self.clearGame()
-                self.thread_astar =  threading.Thread(target=self.initAlgorithm,args=('a*',False))#para demasiados estado es optimo no reccorrer nodos que ya han sido expandido, pero compromete la completitud de algoritmo
+                self.thread_astar =  threading.Thread(target=self.initAlgorithm,args=('a*',True))#para demasiados estado es optimo no reccorrer nodos que ya han sido expandido, pero compromete la completitud de algoritmo
                 self.thread_astar.start()
                 self.animation=True
             
@@ -448,8 +471,7 @@ class GUI2:
             if not self.animation and self.matriz_random and pygame.key.get_pressed()[pygame.K_r]:#generar matriz random al presionar r
                 self.all_moviements=[]
                 matriz_name = generatorMatrizGame()
-                self.info_matrix = matriz_name.split('_')[1]
-                
+                self.info_matrix = matriz_name.split('_')[0]                
                 self.loadMatrix(matriz_name) 
                 self.clearTexts()
                 

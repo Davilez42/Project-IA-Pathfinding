@@ -53,4 +53,4 @@ class Agent:
                     all_moviments.append((child.posAgente,False))
                     total_nodes_created+=1
                     queue.append(child)
-        raise Exception('No Tiene solucion')   
+        raise Exception('Sin solucion')   
