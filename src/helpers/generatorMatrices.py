@@ -2,7 +2,7 @@ from random import randint,choice
 from datetime import datetime
 
 def generatorMatrizGame()->str:
-    r =  randint(10,70)
+    r =  randint(10,66)
     c = randint(10,125)
     objects = ['2','3']
     matrix = []
