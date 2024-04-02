@@ -2,6 +2,7 @@ from time import sleep
 import pygame
 import numpy as np
 import threading
+from Node import Node
 from helpers.generatorMatrices import generatorMatrizGame
 from math import ceil, floor
 import datetime
@@ -331,9 +332,13 @@ class GUI2:
             self.all_moviements=[]
             ambiente =Agent(self.matriz,self.pos_agent,self.pos_churiken)        
             init_time = datetime.datetime.now()
-            result = ambiente.run(algorithm,avoid_backing_out,self.updateInfoScreen) 
+            if(algorithm=='a*'):
+                result = ambiente.aStar(algorithm,avoid_backing_out,self.updateInfoScreen) 
+            else:
+                result = ambiente.bfs(algorithm,avoid_backing_out,self.updateInfoScreen) 
+                
             end_time = datetime.datetime.now()
-            node_winner = result[0]
+            node_winner:Node = result[0]
             
             self.all_moviements = result[3]
             
