@@ -1,5 +1,6 @@
 from random import randint,choice
 from datetime import datetime
+from os import path
 
 def generatorMatrizGame()->str:
     r =  randint(10,66)
@@ -24,15 +25,15 @@ def generatorMatrizGame()->str:
 
 
     date_creaion = datetime.now().microsecond
-    matriz_name = f'{r}x{c}_{str(date_creaion)}_R'
-    with open(f'./src/matrices/{matriz_name}.txt','w') as file: 
+    name = f'{r}x{c}_{str(date_creaion)}_R'
+    with open(path.join(path.dirname(__file__),f'../matrices/{name}.txt'),'w') as file: 
             for row in matrix:
                 row_str = ''
                 for j,obj in enumerate(row):
                         row_str+=obj                  
                 file.write(row_str+'\n') 
           
-    return matriz_name
+    return name
 
 
        
