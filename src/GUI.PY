@@ -40,13 +40,12 @@ class GUI2:
         self.counter_nodes_expanded_star  =0
         self.counter_costo_total_star = 0
         self.time_star = ''
-        self.depth_star = 0
-        
+      
         self.counter_nodes_create_bfs  =0
         self.counter_nodes_expanded_bfs  =0
         self.counter_costo_total_bfs = 0
         self.time_bfs = ''
-        self.depth_bfs = 0
+
         #informacion general
         self.info_text = ''
         self.info_matrix = ''
@@ -193,14 +192,14 @@ class GUI2:
         self.label_nodes_expanded = label_min.render('N.Expandidos',1,(252, 251, 252))
         self.label_nodes_created = label_min.render('N.Creados',1,(252, 251, 252))
         self.label_total_cost = label_min.render('Costo total',1,(252, 251, 252))
-        self.label_depth = label_min.render('Profundidad',1,(252, 251, 252))
+
         
         #creacion de etiquetas de la informacion de a*
         self.text_nodes_created_astar = label_min.render(str(self.counter_nodes_create_star),1,self.PURPLE_COLOR)
         self.text_nodes_expanded_astar = label_min.render(str(self.counter_nodes_expanded_star),1,self.PURPLE_COLOR)
         self.text_time_astar = text_date.render(str(self.time_star),1,self.PURPLE_COLOR)
         self.text_total_cost_astar = label_min.render(str(self.counter_costo_total_star),1,self.PURPLE_COLOR)
-        self.text_depth_astar = label_min.render(str(self.depth_star),1,self.PURPLE_COLOR)
+
         
         
         #creacion de etiquetas de la informacion de bfs
@@ -208,7 +207,7 @@ class GUI2:
         self.text_nodes_expanded_bfs = label_min.render(str(self.counter_nodes_expanded_bfs),1,self.GREEN_COLOR)
         self.text_time_bfs = text_date.render(str(self.time_bfs),1,self.GREEN_COLOR)
         self.text_total_cost_bfs = label_min.render(str(self.counter_costo_total_bfs),1,self.GREEN_COLOR)
-        self.text_depth_bfs = label_min.render(str(self.depth_bfs),1,self.GREEN_COLOR)
+  
                 
 
         #subtitulos
@@ -217,8 +216,7 @@ class GUI2:
         self.screen.blit(self.label_nodes_expanded,(70,self.HEIGHT-95))
         self.screen.blit(self.label_nodes_created,(210,self.HEIGHT-95))
         self.screen.blit(self.label_total_cost,(320,self.HEIGHT-95))
-        self.screen.blit(self.label_depth,(430,self.HEIGHT-95))
-        self.screen.blit(self.label_time,(550,self.HEIGHT-95))
+        self.screen.blit(self.label_time,(430,self.HEIGHT-95))
 
 
         
@@ -229,16 +227,15 @@ class GUI2:
         #texto informacion A*
         self.screen.blit(self.text_nodes_expanded_astar,(70,self.HEIGHT-68))
         self.screen.blit(self.text_nodes_created_astar,(210,self.HEIGHT-68))
-        self.screen.blit(self.text_time_astar,(550,self.HEIGHT-68))
         self.screen.blit(self.text_total_cost_astar,(320,self.HEIGHT-68))
-        self.screen.blit(self.text_depth_astar,(430,self.HEIGHT-68))
+        self.screen.blit(self.text_time_astar,(430,self.HEIGHT-68))
 
         #texto informacion BFS
         self.screen.blit(self.text_nodes_expanded_bfs,(70,self.HEIGHT-35))
         self.screen.blit(self.text_nodes_created_bfs,(210,self.HEIGHT-35))
-        self.screen.blit(self.text_time_bfs,(550,self.HEIGHT-35))
         self.screen.blit(self.text_total_cost_bfs,(320,self.HEIGHT-35))
-        self.screen.blit(self.text_depth_bfs,(430,self.HEIGHT-35))
+        self.screen.blit(self.text_time_bfs,(430,self.HEIGHT-35))
+
     
         #textos de informacion de teclas
         label_buttons = pygame.font.SysFont("Verdana", 20)
