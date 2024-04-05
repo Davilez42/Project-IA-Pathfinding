@@ -4,7 +4,7 @@ from Node import Node
 
 class Agent:
     def __init__(self,init_matrix,pos_agent,pos_chiriken) -> None:
-        self.init_matrix:np.Arrayterator = init_matrix
+        self.init_matrix = init_matrix
         self.pos_churiken = pos_chiriken
         self.pos_agent = pos_agent
 
@@ -93,8 +93,7 @@ class Agent:
                             queue[i]=child#remplazo al nodo que mejora la ruta
                         create = False
                         break 
-                        
-                    
+                                           
                 if create and child.posAgente not in nodes_explored:
                     all_moviments.append((child.posAgente,False))
                     total_nodes_created+=1
