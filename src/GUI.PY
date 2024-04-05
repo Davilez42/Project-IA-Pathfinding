@@ -7,11 +7,13 @@ from helpers.generatorMatrices import generatorMatrizGame
 from math import ceil, floor
 import datetime
 from Agent import Agent
+from os import path
+
 
 
 
 WIDTH = 1250
-HEIGHT = 800
+HEIGHT = 750
 
 class GUI2:
     def __init__(self,width,heigth) -> None:
@@ -54,7 +56,7 @@ class GUI2:
     def loadMatrix(self,name):
         #cargo la matriz especificada, debe existir en la carpeta "matrices"
         try:
-            with open(f'./src/matrices/{name}.txt') as file:
+            with open(path.join(path.dirname(__file__),f'matrices/{name}.txt')) as file:
                 matriz_ = []
                 for i,r in enumerate(file.readlines()):
                     row:str = r.replace('\n','')
