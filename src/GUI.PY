@@ -115,7 +115,7 @@ class GUI2:
                 elem = self.matriz[i,j]              
                 pygame.draw.rect(self.screen,self.BLACK_COLOR,(c,r,self.width_block,self.width_block))   
                                        
-                if(elem =='7'):#obstaculo
+                if(elem =='X'):#obstaculo
                     pygame.draw.rect(self.screen,self.GRAY_COLOR,(c,r,self.width_block,self.width_block))  
                             
                 if(elem=='*'):#objectivo
@@ -125,10 +125,10 @@ class GUI2:
                     self.agent_coordenates = (c,r)                 
                     pygame.draw.circle(self.screen,self.WHITE_COLOR,(c+self.width_block/2,r+self.width_block/2),self.width_block/2.5)
          
-                if(elem=='3'):#laser izquierda y derecha
+                if(elem=='V'):#laser izquierda y derecha
                     pygame.draw.rect(self.screen,self.RED_COLOR,(c,r,self.width_block*0.2,self.width_block))
                     
-                if(elem=='2'):#laser de arriba y abajo
+                if(elem=='H'):#laser de arriba y abajo
                     pygame.draw.rect(self.screen,self.RED_COLOR,(c,r+self.width_block-self.width_block*0.2,self.width_block,self.width_block*0.2))
                                      
                 c+= self.width_block
@@ -332,9 +332,9 @@ class GUI2:
             ambiente =Agent(self.matriz,self.pos_agent,self.pos_churiken)        
             init_time = datetime.datetime.now()
             if(algorithm=='a*'):
-                result = ambiente.aStar(algorithm,avoid_backing_out,self.updateInfoScreen) 
+                result = ambiente.aStar(avoid_backing_out,self.updateInfoScreen) 
             else:
-                result = ambiente.bfs(algorithm,avoid_backing_out,self.updateInfoScreen) 
+                result = ambiente.bfs(avoid_backing_out,self.updateInfoScreen) 
                 
             end_time = datetime.datetime.now()
             node_winner:Node = result[0]
