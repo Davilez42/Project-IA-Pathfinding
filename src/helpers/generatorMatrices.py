@@ -5,25 +5,22 @@ from os import path
 def generatorMatrizGame()->str:
     r =  randint(10,66)
     c = randint(10,125)
-    objects = ['2','3']
+    objects = ['V','H']
     matrix = []
     for i in range(r):
         row = []
         for j in range(c):
             pro = randint(0,100)
             if pro<30:
-                row.append('7')
-            elif pro<37:
-                row.append( choice(objects))
-                
+                row.append('X')
+            elif pro<40:
+                row.append( choice(objects))              
             else:
-                row.append('0')
+                row.append('1')
         matrix.append(row)
 
     matrix[randint(0,r-1)][randint(0,c-1)] = '*'
     matrix[randint(0,r-1)][randint(0,c-1)] = '@'
-
-
     date_creaion = datetime.now().microsecond
     name = f'{r}x{c}_{str(date_creaion)}_R'
     with open(path.join(path.dirname(__file__),f'../matrices/{name}.txt'),'w') as file: 
