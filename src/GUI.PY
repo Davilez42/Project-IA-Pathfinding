@@ -112,14 +112,25 @@ class GUI2:
         #mapeo la matriz en la pantalla recorriendo filas y columnas y creando su correspondiente elemento            
         for i in range(self.matriz.shape[0]):
             for j in range(self.matriz.shape[1]):
-                elem = self.matriz[i,j]              
-                pygame.draw.rect(self.screen,self.BLACK_COLOR,(c,r,self.width_block,self.width_block))   
+                elem = self.matriz[i,j]
+                     
+                pygame.draw.rect(self.screen,(149, 184, 84),(c,r,self.width_block,self.width_block))   
+                
+                if(elem=='2'):
+                    pygame.draw.rect(self.screen,(236, 181, 52),(c,r,self.width_block,self.width_block)) 
+                    
+                if(elem=='4'):
+                    pygame.draw.rect(self.screen,(234, 127, 54),(c,r,self.width_block,self.width_block)) 
+                    
+                if(elem=='8'):
+                    pygame.draw.rect(self.screen,(203, 43, 57),(c,r,self.width_block,self.width_block)) 
+                    
                                        
                 if(elem =='X'):#obstaculo
-                    pygame.draw.rect(self.screen,self.GRAY_COLOR,(c,r,self.width_block,self.width_block))  
+                    pygame.draw.rect(self.screen,self.BLACK_COLOR,(c,r,self.width_block,self.width_block))  
                             
                 if(elem=='*'):#objectivo
-                    pygame.draw.circle(self.screen,self.RED_COLOR,(c+self.width_block/2,r+self.width_block/2),self.width_block/2.5)
+                    pygame.draw.circle(self.screen,self.GRAY_COLOR,(c+self.width_block/2,r+self.width_block/2),self.width_block/2.5)
 
                 if(elem=='@'):#jugador
                     self.agent_coordenates = (c,r)                 

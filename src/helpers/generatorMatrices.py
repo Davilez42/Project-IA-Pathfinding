@@ -3,8 +3,8 @@ from datetime import datetime
 from os import path
 
 def generatorMatrizGame()->str:
-    r =  randint(10,66)
-    c = randint(10,125)
+    r =  20
+    c = 20
     objects = ['V','H']
     matrix = []
     for i in range(r):
@@ -16,7 +16,7 @@ def generatorMatrizGame()->str:
             elif pro<40:
                 row.append( choice(objects))              
             else:
-                row.append('1')
+                row.append(choice(['1',"2","4","8"]))
         matrix.append(row)
 
     matrix[randint(0,r-1)][randint(0,c-1)] = '*'

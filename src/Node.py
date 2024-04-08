@@ -22,25 +22,30 @@ class Node:
         xI = self.posAgente[0]
         yI = self.posAgente[1] - 1
         if(yI>=0 and  self.matriz[yI,xI]!='H'  and  self.matriz[yI,xI]!='X'):
-                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.cost_acumulated+1,'U',self)
+                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.calculate_cost((xI,yI)),'U',self)
             
     def down(self):
         xI = self.posAgente[0]
         yI = self.posAgente[1] + 1
         if(yI<=self.matriz.shape[0]-1  and self.matriz[self.posAgente[1],self.posAgente[0]]!='H'  and  self.matriz[yI,xI]!='X' ):
-                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.cost_acumulated+1,'D',self)
+                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.calculate_cost((xI,yI)),'D',self)
                     
     def left(self):
         xI = self.posAgente[0]-1
         yI = self.posAgente[1] 
         if(xI>=0 and self.matriz[self.posAgente[1],self.posAgente[0]]!='V'  and  self.matriz[yI,xI]!='X' ):
-                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.cost_acumulated+1,'L',self)
+                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.calculate_cost((xI,yI)),'L',self)
             
             
     def right(self):
         xI = self.posAgente[0]+1
         yI = self.posAgente[1] 
         if(xI<=self.matriz.shape[1]-1  and self.matriz[yI,xI]!='V'  and  self.matriz[yI,xI]!='X' ):               
-                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.cost_acumulated+1,'R',self)  
+                return Node(self.matriz.copy(),(xI,yI),self.posTarget,self.calculate_cost((xI,yI)),'R',self)  
             
     
+    
+    def calculate_cost(self, position)->int:#calcula el costo de moverme a la casilla, donde el costo esta reprenstado en un numero en la posicion
+        if(self.matriz[position[1],position[0]] not in ['*','H','V','@']):
+            return int(self.matriz[position[1],position[0]]) + self.cost_acumulated   
+        return self.cost_acumulated + 1
