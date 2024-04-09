@@ -10,502 +10,554 @@ from Agent import Agent
 from os import path
 
 
-
-
 WIDTH = 1250
 HEIGHT = 750
 
+
 class GUI2:
-    def __init__(self,width,heigth) -> None:
-        #constantes
+    def __init__(self, width, heigth) -> None:
+        # constantes
         self.WIDTH = width
         self.HEIGHT = heigth
-        self.RED_COLOR = (255,51,51)
+        self.RED_COLOR = (255, 51, 51)
         self.WHITE_COLOR = 'white'
         self.BLACK_COLOR = (29, 29, 29)
-        self.GRAY_COLOR =(97,98,99)
-        self.PURPLE_COLOR  ='darkorchid1'
+        self.GRAY_COLOR = (97, 98, 99)
+        self.PURPLE_COLOR = 'darkorchid1'
         self.GREEN_COLOR = (81, 124, 87)
         self.BACKGROUND_COLOR = (72, 67, 64)
         self.NODE_EXPANDED_COLOR = (63, 212, 255)
         self.NODE_CREATED_COLOR = (253, 255, 44)
-         
+
         #
-        self.all_moviements=[]
+        self.all_moviements = []
         self.matriz = None
         self.dimention_y_used = self.HEIGHT
         self.dimention_x_used = self.HEIGHT
         self.time_animation = 0.01
-           
-        #informacion de cada algoritmo para mostrar en patalla
-        self.counter_nodes_create_star  =0
-        self.counter_nodes_expanded_star  =0
+
+        # informacion de cada algoritmo para mostrar en patalla
+        self.counter_nodes_create_star = 0
+        self.counter_nodes_expanded_star = 0
         self.counter_costo_total_star = 0
         self.time_star = ''
-      
-        self.counter_nodes_create_bfs  =0
-        self.counter_nodes_expanded_bfs  =0
+
+        self.counter_nodes_create_bfs = 0
+        self.counter_nodes_expanded_bfs = 0
         self.counter_costo_total_bfs = 0
         self.time_bfs = ''
 
-        #informacion general
+        # informacion general
         self.info_text = ''
         self.info_matrix = ''
         self.run()
-         
-    def loadMatrix(self,name):
-        #cargo la matriz especificada, debe existir en la carpeta "matrices"
+
+    def loadMatrix(self, name):
+        # cargo la matriz especificada, debe existir en la carpeta "matrices"
         try:
-            with open(path.join(path.dirname(__file__),f'matrices/{name}.txt')) as file:
+            with open(path.join(path.dirname(__file__), f'matrices/{name}.txt')) as file:
                 matriz_ = []
-                for i,r in enumerate(file.readlines()):
-                    row:str = r.replace('\n','')
-                    row:list = [c for c in row] 
+                for i, r in enumerate(file.readlines()):
+                    row: str = r.replace('\n', '')
+                    row: list = [c for c in row]
                     try:
-                        self.pos_agent = (row.index('@'),i)                
-                    except ValueError :
+                        self.pos_agent = (row.index('@'), i)
+                    except ValueError:
                         pass
                     try:
-                        self.pos_churiken = (row.index('*'),i)                
-                    except ValueError :
-                        pass                                        
-                    matriz_.append(row)            
-                self.matriz = np.array(matriz_)     
-            self.calculateScreen()#calculo las dimensiones de la matrix con relacion a la pantalla 
-            self.mappingMatrizOnScreen()   #defino el tamano del juego en base a la matrix leida    
+                        self.pos_churiken = (row.index('*'), i)
+                    except ValueError:
+                        pass
+                    matriz_.append(row)
+                self.matriz = np.array(matriz_)
+            self.calculateScreen()  # calculo las dimensiones de la matrix con relacion a la pantalla
+            self.mappingMatrizOnScreen()  # defino el tamano del juego en base a la matrix leida
+            self.info_matrix = f'{self.matriz.shape[0]}x{self.matriz.shape[1]}'
         except FileNotFoundError as e:
             self.info_text = 'La matriz no existe'
 
     def calculateScreen(self):
-        #obtengo las dimensiones de la matriz para calcular su posicion en la pantalla
+        # obtengo las dimensiones de la matriz para calcular su posicion en la pantalla
         rows = self.matriz.shape[0]
         col = self.matriz.shape[1]
-    
+
         x_d = self.WIDTH/col
-        y_d =  (self.HEIGHT-140)/rows
+        y_d = (self.HEIGHT-140)/rows
 
-        self.width_block = floor(min([x_d,y_d]))
+        self.width_block = floor(min([x_d, y_d]))
 
-        #calculo las dimensiones que son usadas en cada lado
+        # calculo las dimensiones que son usadas en cada lado
         self.dimention_y_used = self.width_block*rows
         self.dimention_x_used = self.width_block*col
-        
+
         self.space_x = (self.WIDTH - self.dimention_x_used)/2
-        self.space_y = (self.HEIGHT-140- self.dimention_y_used)/2
-        
-        #cargo y redimensiono el icono de navegacion
-        self.agent_icon  = pygame.image.load('./src/icons/navigation.png')
-        self.agent_icon = pygame.transform.scale(self.agent_icon,(self.width_block,self.width_block))
-        #genero copias de las rotaciones del icono
-        self.agent_icon_up = pygame.transform.rotate(self.agent_icon,0)
-        self.agent_icon_left = pygame.transform.rotate(self.agent_icon,90) 
-        self.agent_icon_rigth = pygame.transform.rotate(self.agent_icon,280) 
-        self.agent_icon_down = pygame.transform.rotate(self.agent_icon,180) 
-        
+        self.space_y = (self.HEIGHT-140 - self.dimention_y_used)/2
+
+        # cargo y redimensiono el icono de navegacion
+        self.agent_icon = pygame.image.load('./src/icons/navigation.png')
+        self.agent_icon = pygame.transform.scale(
+            self.agent_icon, (self.width_block, self.width_block))
+        # genero copias de las rotaciones del icono
+        self.agent_icon_up = pygame.transform.rotate(self.agent_icon, 0)
+        self.agent_icon_left = pygame.transform.rotate(self.agent_icon, 90)
+        self.agent_icon_rigth = pygame.transform.rotate(self.agent_icon, 270)
+        self.agent_icon_down = pygame.transform.rotate(self.agent_icon, 180)
+
     def mappingMatrizOnScreen(self):
-        if self.matriz is None :return       
-        self.screen.fill(self.BACKGROUND_COLOR)#limpio la pantalla
-        
-        r= (self.HEIGHT-60- self.dimention_y_used)/2
-        c= (self.WIDTH- self.dimention_x_used)/2
-        
-        #mapeo la matriz en la pantalla recorriendo filas y columnas y creando su correspondiente elemento            
+        if self.matriz is None:
+            return
+        self.screen.fill(self.BACKGROUND_COLOR)  # limpio la pantalla
+
+        r = (self.HEIGHT-60 - self.dimention_y_used)/2
+        c = (self.WIDTH - self.dimention_x_used)/2
+
+        # mapeo la matriz en la pantalla recorriendo filas y columnas y creando su correspondiente elemento
         for i in range(self.matriz.shape[0]):
             for j in range(self.matriz.shape[1]):
-                elem = self.matriz[i,j]
-                     
-                pygame.draw.rect(self.screen,(149, 184, 84),(c,r,self.width_block,self.width_block))   
-                
-                if(elem=='2'):
-                    pygame.draw.rect(self.screen,(236, 181, 52),(c,r,self.width_block,self.width_block)) 
-                    
-                if(elem=='4'):
-                    pygame.draw.rect(self.screen,(234, 127, 54),(c,r,self.width_block,self.width_block)) 
-                    
-                if(elem=='8'):
-                    pygame.draw.rect(self.screen,(203, 43, 57),(c,r,self.width_block,self.width_block)) 
-                    
-                                       
-                if(elem =='X'):#obstaculo
-                    pygame.draw.rect(self.screen,self.BLACK_COLOR,(c,r,self.width_block,self.width_block))  
-                            
-                if(elem=='*'):#objectivo
-                    pygame.draw.circle(self.screen,self.GRAY_COLOR,(c+self.width_block/2,r+self.width_block/2),self.width_block/2.5)
+                elem = self.matriz[i, j]
 
-                if(elem=='@'):#jugador
-                    self.agent_coordenates = (c,r)                 
-                    pygame.draw.circle(self.screen,self.WHITE_COLOR,(c+self.width_block/2,r+self.width_block/2),self.width_block/2.5)
-         
-                if(elem=='V'):#laser izquierda y derecha
-                    pygame.draw.rect(self.screen,self.RED_COLOR,(c,r,self.width_block*0.2,self.width_block))
-                    
-                if(elem=='H'):#laser de arriba y abajo
-                    pygame.draw.rect(self.screen,self.RED_COLOR,(c,r+self.width_block-self.width_block*0.2,self.width_block,self.width_block*0.2))
-                                     
-                c+= self.width_block
-            r+= self.width_block
-            c=(self.WIDTH- self.dimention_x_used)/2
-            
-        #creo una copia de la matriz en pantalla para no tener que volver a mapearla en caso de querer limpiar la pantalla
-        self.screen_background = pygame.Surface.copy(pygame.Surface.subsurface(self.screen,(0,40,self.WIDTH,self.HEIGHT-140)))
+                pygame.draw.rect(self.screen, (149, 184, 84),
+                                 (c, r, self.width_block, self.width_block))
+
+                if (elem == '2'):
+                    pygame.draw.rect(self.screen, (236, 181, 52),
+                                     (c, r, self.width_block, self.width_block))
+
+                if (elem == '4'):
+                    pygame.draw.rect(self.screen, (234, 127, 54),
+                                     (c, r, self.width_block, self.width_block))
+
+                if (elem == '8'):
+                    pygame.draw.rect(self.screen, (203, 43, 57),
+                                     (c, r, self.width_block, self.width_block))
+
+                if (elem == 'X'):  # obstaculo
+                    pygame.draw.rect(self.screen, self.BLACK_COLOR,
+                                     (c, r, self.width_block, self.width_block))
+
+                if (elem == '*'):  # objectivo
+                    pygame.draw.circle(self.screen, self.GRAY_COLOR, (
+                        c+self.width_block/2, r+self.width_block/2), self.width_block/2.5)
+
+                if (elem == '@'):  # jugador
+                    self.agent_coordenates = (c, r)
+                    pygame.draw.circle(self.screen, self.WHITE_COLOR, (
+                        c+self.width_block/2, r+self.width_block/2), self.width_block/2.5)
+
+                if (elem == 'V'):  # laser izquierda y derecha
+                    pygame.draw.rect(self.screen, self.RED_COLOR,
+                                     (c, r, self.width_block*0.2, self.width_block))
+
+                if (elem == 'H'):  # laser de arriba y abajo
+                    pygame.draw.rect(self.screen, self.RED_COLOR, (c, r+self.width_block -
+                                     self.width_block*0.2, self.width_block, self.width_block*0.2))
+
+                c += self.width_block
+            r += self.width_block
+            c = (self.WIDTH - self.dimention_x_used)/2
+
+        # creo una copia de la matriz en pantalla para no tener que volver a mapearla en caso de querer limpiar la pantalla
+        self.screen_background = pygame.Surface.copy(
+            pygame.Surface.subsurface(self.screen, (0, 40, self.WIDTH, self.HEIGHT-140)))
         self.load_matriz = True
 
     def clearTexts(self):
-        self.info_text=''
-        self.counter_nodes_create_star  =0
-        self.counter_nodes_expanded_star  =0
+        self.info_text = ''
+        self.counter_nodes_create_star = 0
+        self.counter_nodes_expanded_star = 0
         self.counter_costo_total_star = 0
         self.time_star = '-------'
-        self.depth_star = 0       
-        self.counter_nodes_create_bfs  =0
-        self.counter_nodes_expanded_bfs  =0
+        self.depth_star = 0
+        self.counter_nodes_create_bfs = 0
+        self.counter_nodes_expanded_bfs = 0
         self.counter_costo_total_bfs = 0
         self.time_bfs = '-------'
         self.depth_bfs = 0
-       
-    def clearGame(self):
-        self.screen.blit(self.screen_background ,(0,40)) 
 
-    def putTextOnScreen(self):     
-        pygame.draw.rect(self.screen,self.BLACK_COLOR,(0,self.HEIGHT-100,self.WIDTH,100))
-        pygame.draw.rect(self.screen,self.BLACK_COLOR,(0,0,self.WIDTH,40))      
+    def clearGame(self):
+        self.screen.blit(self.screen_background, (0, 40))
+
+    def putTextOnScreen(self):
+        pygame.draw.rect(self.screen, self.BLACK_COLOR,
+                         (0, self.HEIGHT-100, self.WIDTH, 100))
+        pygame.draw.rect(self.screen, self.BLACK_COLOR, (0, 0, self.WIDTH, 40))
 
         label_text = pygame.font.SysFont("Verdana", 20)
         label_min = pygame.font.SysFont("Verdana", 18)
         text_date = pygame.font.SysFont("Verdana", 16)
 
-        #informacion de elementos
-        #JUGADOR
-        pygame.draw.circle(self.screen,self.WHITE_COLOR,(20,20),10)
-        self.screen.blit(label_min.render('Jugador',1,self.WHITE_COLOR),(40,8))
-        #DESTINO
-        pygame.draw.circle(self.screen,self.RED_COLOR,(130,20),10)
-        self.screen.blit(label_min.render('Destino',1,self.WHITE_COLOR),(150,8))
-        
-        #LASER
-        pygame.draw.rect(self.screen,self.RED_COLOR,(240,10,5,20),10)
-        self.screen.blit(label_min.render('Laser',1,self.WHITE_COLOR),(255,8))
-        
-        #NODE EXPANDED
-        pygame.draw.rect(self.screen,self.NODE_EXPANDED_COLOR,(320,10,20,20),10)
-        self.screen.blit(label_min.render('Expandido',1,self.WHITE_COLOR),(350,8))
-        
-        #NODE EXPANDED
-        pygame.draw.rect(self.screen,self.NODE_CREATED_COLOR,(460,10,20,20),10)
-        self.screen.blit(label_min.render('Creado',1,self.WHITE_COLOR),(490,8))
+        # informacion de elementos
+        # JUGADOR
+        pygame.draw.circle(self.screen, self.WHITE_COLOR, (20, 20), 10)
+        self.screen.blit(label_min.render(
+            'Jugador', 1, self.WHITE_COLOR), (40, 8))
+        # DESTINO
+        pygame.draw.circle(self.screen, self.RED_COLOR, (130, 20), 10)
+        self.screen.blit(label_min.render(
+            'Destino', 1, self.WHITE_COLOR), (150, 8))
 
-               
-        self.label_tittle_info = label_text.render(str(self.info_text),1,(252, 251, 252))
-        self.label_matriz_info = label_text.render(str(self.info_matrix),1,(252, 251, 252))             
-        self.label_astar = label_text.render('A*',1,self.PURPLE_COLOR)
-        self.label_bfs = label_text.render('BFS',1,self.GREEN_COLOR)
-        
-        
-        self.label_time = label_min.render('Tiempo',1,(252, 251, 252))
-        self.label_nodes_expanded = label_min.render('N.Expandidos',1,(252, 251, 252))
-        self.label_nodes_created = label_min.render('N.Creados',1,(252, 251, 252))
-        self.label_total_cost = label_min.render('Costo total',1,(252, 251, 252))
+        # LASER
+        pygame.draw.rect(self.screen, self.RED_COLOR, (240, 10, 5, 20), 10)
+        self.screen.blit(label_min.render(
+            'Laser', 1, self.WHITE_COLOR), (255, 8))
 
-        
-        #creacion de etiquetas de la informacion de a*
-        self.text_nodes_created_astar = label_min.render(str(self.counter_nodes_create_star),1,self.PURPLE_COLOR)
-        self.text_nodes_expanded_astar = label_min.render(str(self.counter_nodes_expanded_star),1,self.PURPLE_COLOR)
-        self.text_time_astar = text_date.render(str(self.time_star),1,self.PURPLE_COLOR)
-        self.text_total_cost_astar = label_min.render(str(self.counter_costo_total_star),1,self.PURPLE_COLOR)
+        # NODE EXPANDED
+        pygame.draw.rect(self.screen, self.NODE_EXPANDED_COLOR,
+                         (320, 10, 20, 20), 10)
+        self.screen.blit(label_min.render(
+            'Expandido', 1, self.WHITE_COLOR), (350, 8))
 
-        
-        
-        #creacion de etiquetas de la informacion de bfs
-        self.text_nodes_created_bfs = label_min.render(str(self.counter_nodes_create_bfs),1,self.GREEN_COLOR)
-        self.text_nodes_expanded_bfs = label_min.render(str(self.counter_nodes_expanded_bfs),1,self.GREEN_COLOR)
-        self.text_time_bfs = text_date.render(str(self.time_bfs),1,self.GREEN_COLOR)
-        self.text_total_cost_bfs = label_min.render(str(self.counter_costo_total_bfs),1,self.GREEN_COLOR)
-  
-                
+        # NODE EXPANDED
+        pygame.draw.rect(self.screen, self.NODE_CREATED_COLOR,
+                         (460, 10, 20, 20), 10)
+        self.screen.blit(label_min.render(
+            'Creado', 1, self.WHITE_COLOR), (490, 8))
 
-        #subtitulos
-        self.screen.blit(self.label_tittle_info,((self.WIDTH/2)-5,8))
-        self.screen.blit(self.label_matriz_info,(self.WIDTH-100,10))
-        self.screen.blit(self.label_nodes_expanded,(70,self.HEIGHT-95))
-        self.screen.blit(self.label_nodes_created,(210,self.HEIGHT-95))
-        self.screen.blit(self.label_total_cost,(320,self.HEIGHT-95))
-        self.screen.blit(self.label_time,(430,self.HEIGHT-95))
+        self.label_tittle_info = label_text.render(
+            str(self.info_text), 1, (252, 251, 252))
+        self.label_matriz_info = label_text.render(
+            str(self.info_matrix), 1, (252, 251, 252))
+        self.label_astar = label_text.render('A*', 1, self.PURPLE_COLOR)
+        self.label_bfs = label_text.render('BFS', 1, self.GREEN_COLOR)
 
+        self.label_time = label_min.render('Tiempo', 1, (252, 251, 252))
+        self.label_nodes_expanded = label_min.render(
+            'N.Expandidos', 1, (252, 251, 252))
+        self.label_nodes_created = label_min.render(
+            'N.Creados', 1, (252, 251, 252))
+        self.label_total_cost = label_min.render(
+            'Costo total', 1, (252, 251, 252))
 
-        
-        #titulos de algoritmo
-        self.screen.blit(self.label_astar,(15,self.HEIGHT-68))
-        self.screen.blit(self.label_bfs,(10,self.HEIGHT-35))    
-        
-        #texto informacion A*
-        self.screen.blit(self.text_nodes_expanded_astar,(70,self.HEIGHT-68))
-        self.screen.blit(self.text_nodes_created_astar,(210,self.HEIGHT-68))
-        self.screen.blit(self.text_total_cost_astar,(320,self.HEIGHT-68))
-        self.screen.blit(self.text_time_astar,(430,self.HEIGHT-68))
+        # creacion de etiquetas de la informacion de a*
+        self.text_nodes_created_astar = label_min.render(
+            str(self.counter_nodes_create_star), 1, self.PURPLE_COLOR)
+        self.text_nodes_expanded_astar = label_min.render(
+            str(self.counter_nodes_expanded_star), 1, self.PURPLE_COLOR)
+        self.text_time_astar = text_date.render(
+            str(self.time_star), 1, self.PURPLE_COLOR)
+        self.text_total_cost_astar = label_min.render(
+            str(self.counter_costo_total_star), 1, self.PURPLE_COLOR)
 
-        #texto informacion BFS
-        self.screen.blit(self.text_nodes_expanded_bfs,(70,self.HEIGHT-35))
-        self.screen.blit(self.text_nodes_created_bfs,(210,self.HEIGHT-35))
-        self.screen.blit(self.text_total_cost_bfs,(320,self.HEIGHT-35))
-        self.screen.blit(self.text_time_bfs,(430,self.HEIGHT-35))
+        # creacion de etiquetas de la informacion de bfs
+        self.text_nodes_created_bfs = label_min.render(
+            str(self.counter_nodes_create_bfs), 1, self.GREEN_COLOR)
+        self.text_nodes_expanded_bfs = label_min.render(
+            str(self.counter_nodes_expanded_bfs), 1, self.GREEN_COLOR)
+        self.text_time_bfs = text_date.render(
+            str(self.time_bfs), 1, self.GREEN_COLOR)
+        self.text_total_cost_bfs = label_min.render(
+            str(self.counter_costo_total_bfs), 1, self.GREEN_COLOR)
 
-    
-        #textos de informacion de teclas
+        # subtitulos
+        self.screen.blit(self.label_tittle_info, ((self.WIDTH/2)-5, 8))
+        self.screen.blit(self.label_matriz_info, (self.WIDTH-100, 10))
+        self.screen.blit(self.label_nodes_expanded, (70, self.HEIGHT-95))
+        self.screen.blit(self.label_nodes_created, (210, self.HEIGHT-95))
+        self.screen.blit(self.label_total_cost, (320, self.HEIGHT-95))
+        self.screen.blit(self.label_time, (430, self.HEIGHT-95))
+
+        # titulos de algoritmo
+        self.screen.blit(self.label_astar, (15, self.HEIGHT-68))
+        self.screen.blit(self.label_bfs, (10, self.HEIGHT-35))
+
+        # texto informacion A*
+        self.screen.blit(self.text_nodes_expanded_astar, (70, self.HEIGHT-68))
+        self.screen.blit(self.text_nodes_created_astar, (210, self.HEIGHT-68))
+        self.screen.blit(self.text_total_cost_astar, (320, self.HEIGHT-68))
+        self.screen.blit(self.text_time_astar, (430, self.HEIGHT-68))
+
+        # texto informacion BFS
+        self.screen.blit(self.text_nodes_expanded_bfs, (70, self.HEIGHT-35))
+        self.screen.blit(self.text_nodes_created_bfs, (210, self.HEIGHT-35))
+        self.screen.blit(self.text_total_cost_bfs, (320, self.HEIGHT-35))
+        self.screen.blit(self.text_time_bfs, (430, self.HEIGHT-35))
+
+        # textos de informacion de teclas
         label_buttons = pygame.font.SysFont("Verdana", 20)
         label_info_button = pygame.font.SysFont("Verdana", 14)
-        text_q_button =  label_buttons.render('Q',1,self.WHITE_COLOR)
-        text_e_button =  label_buttons.render('E',1,self.WHITE_COLOR)
-        text_l_button =  label_buttons.render('L',1,self.WHITE_COLOR)
-        text_a_button =  label_buttons.render('A',1,self.WHITE_COLOR)
-        text_s_button =  label_buttons.render('S',1,self.WHITE_COLOR)
-        text_d_button =  label_buttons.render('D',1,self.WHITE_COLOR)
-        text_c_button =  label_buttons.render('C',1,self.WHITE_COLOR)
-        text_r_button =  label_buttons.render('R',1,self.WHITE_COLOR)
-        text_inf_a_button = label_info_button.render('ejecuta A*',1,self.WHITE_COLOR)
-        text_inf_d_button = label_info_button.render('ejecuta BFS',1,self.WHITE_COLOR)
-        text_inf_s_button = label_info_button.render('animacion',1,self.WHITE_COLOR)
-        text_inf_r_button = label_info_button.render('generar matriz',1,self.WHITE_COLOR)
-        text_inf_c_button = label_info_button.render('limpiar',1,self.WHITE_COLOR)
-        text_inf_l_button = label_info_button.render('cargar',1,self.WHITE_COLOR)
-        text_inf_q_button = label_info_button.render('vel -1',1,self.WHITE_COLOR)
-        text_inf_e_button = label_info_button.render('vel +1',1,self.WHITE_COLOR)
-        
-        #ejectia a*
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(700,self.HEIGHT-95,45,42),border_radius=5)
-        self.screen.blit(text_a_button,(715,self.HEIGHT-90))
-        self.screen.blit(text_inf_a_button,(750,self.HEIGHT-86))
-        
-        #ejecuta bfs
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(700,self.HEIGHT-45,45,42),border_radius=5)
-        self.screen.blit(text_d_button,(715,self.HEIGHT-40))
-        self.screen.blit(text_inf_d_button,(750,self.HEIGHT-35))
-        
-        #animacion
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(840,self.HEIGHT-95,45,42),border_radius=5)
-        self.screen.blit(text_s_button,(855,self.HEIGHT-86))
-        self.screen.blit(text_inf_s_button,(890,self.HEIGHT-86))
-        
-        
-        #generar matriz
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(840,self.HEIGHT-45,45,42),border_radius=5)
-        self.screen.blit(text_r_button,(855,self.HEIGHT-40))
-        self.screen.blit(text_inf_r_button,(890,self.HEIGHT-35))
-        
-        #limpiar
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(969,self.HEIGHT-95,45,42),border_radius=5)
-        self.screen.blit(text_c_button,(984,self.HEIGHT-86))
-        self.screen.blit(text_inf_c_button,(1020,self.HEIGHT-86))
-        
-        
-        #cargar
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(1000,self.HEIGHT-45,45,42),border_radius=5)
-        self.screen.blit(text_l_button,(1015,self.HEIGHT-40))
-        self.screen.blit(text_inf_l_button,(1050,self.HEIGHT-35))
-        
-        #bajar velocidad
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(1100,self.HEIGHT-95,45,42),border_radius=5)
-        self.screen.blit(text_q_button,(1115,self.HEIGHT-86))
-        self.screen.blit(text_inf_q_button,(1150,self.HEIGHT-86))
-        
-        #subir velocidad
-        pygame.draw.rect(self.screen,self.BACKGROUND_COLOR,(1100,self.HEIGHT-45,45,42),border_radius=5)
-        self.screen.blit(text_e_button,(1115,self.HEIGHT-40))
-        self.screen.blit(text_inf_e_button,(1150,self.HEIGHT-35))
-            
-    def animationExpanded(self,all_moviments):
-        #animacion de nodos expandidos y creados     
+        text_q_button = label_buttons.render('Q', 1, self.WHITE_COLOR)
+        text_e_button = label_buttons.render('E', 1, self.WHITE_COLOR)
+        text_l_button = label_buttons.render('L', 1, self.WHITE_COLOR)
+        text_a_button = label_buttons.render('A', 1, self.WHITE_COLOR)
+        text_s_button = label_buttons.render('S', 1, self.WHITE_COLOR)
+        text_d_button = label_buttons.render('D', 1, self.WHITE_COLOR)
+        text_c_button = label_buttons.render('C', 1, self.WHITE_COLOR)
+        text_r_button = label_buttons.render('R', 1, self.WHITE_COLOR)
+        text_inf_a_button = label_info_button.render(
+            'ejecuta A*', 1, self.WHITE_COLOR)
+        text_inf_d_button = label_info_button.render(
+            'ejecuta BFS', 1, self.WHITE_COLOR)
+        text_inf_s_button = label_info_button.render(
+            'animacion', 1, self.WHITE_COLOR)
+        text_inf_r_button = label_info_button.render(
+            'generar matriz', 1, self.WHITE_COLOR)
+        text_inf_c_button = label_info_button.render(
+            'limpiar', 1, self.WHITE_COLOR)
+        text_inf_l_button = label_info_button.render(
+            'cargar', 1, self.WHITE_COLOR)
+        text_inf_q_button = label_info_button.render(
+            'vel -1', 1, self.WHITE_COLOR)
+        text_inf_e_button = label_info_button.render(
+            'vel +1', 1, self.WHITE_COLOR)
+
+        # ejectia a*
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (700, self.HEIGHT-95, 45, 42), border_radius=5)
+        self.screen.blit(text_a_button, (715, self.HEIGHT-90))
+        self.screen.blit(text_inf_a_button, (750, self.HEIGHT-86))
+
+        # ejecuta bfs
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (700, self.HEIGHT-45, 45, 42), border_radius=5)
+        self.screen.blit(text_d_button, (715, self.HEIGHT-40))
+        self.screen.blit(text_inf_d_button, (750, self.HEIGHT-35))
+
+        # animacion
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (840, self.HEIGHT-95, 45, 42), border_radius=5)
+        self.screen.blit(text_s_button, (855, self.HEIGHT-86))
+        self.screen.blit(text_inf_s_button, (890, self.HEIGHT-86))
+
+        # generar matriz
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (840, self.HEIGHT-45, 45, 42), border_radius=5)
+        self.screen.blit(text_r_button, (855, self.HEIGHT-40))
+        self.screen.blit(text_inf_r_button, (890, self.HEIGHT-35))
+
+        # limpiar
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (969, self.HEIGHT-95, 45, 42), border_radius=5)
+        self.screen.blit(text_c_button, (984, self.HEIGHT-86))
+        self.screen.blit(text_inf_c_button, (1020, self.HEIGHT-86))
+
+        # cargar
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (1000, self.HEIGHT-45, 45, 42), border_radius=5)
+        self.screen.blit(text_l_button, (1015, self.HEIGHT-40))
+        self.screen.blit(text_inf_l_button, (1050, self.HEIGHT-35))
+
+        # bajar velocidad
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (1100, self.HEIGHT-95, 45, 42), border_radius=5)
+        self.screen.blit(text_q_button, (1115, self.HEIGHT-86))
+        self.screen.blit(text_inf_q_button, (1150, self.HEIGHT-86))
+
+        # subir velocidad
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR,
+                         (1100, self.HEIGHT-45, 45, 42), border_radius=5)
+        self.screen.blit(text_e_button, (1115, self.HEIGHT-40))
+        self.screen.blit(text_inf_e_button, (1150, self.HEIGHT-35))
+
+    def animationExpanded(self, all_moviments):
+        # animacion de nodos expandidos y creados
         self.time_animation = 0.01
-        for action in all_moviments:         
+        for action in all_moviments:
             isExpanded = action[1]
             coordenate = action[0]
-            
+
             x_block = coordenate[0]*self.width_block
             y_block = coordenate[1]*self.width_block
-            if(isExpanded):
-                pygame.draw.rect(self.screen,self.NODE_EXPANDED_COLOR,(self.space_x+x_block,40+self.space_y+y_block,self.width_block,self.width_block))
+            if (isExpanded):
+                pygame.draw.rect(self.screen, self.NODE_EXPANDED_COLOR, (self.space_x +
+                                 x_block, 40+self.space_y+y_block, self.width_block, self.width_block))
             else:
-                pygame.draw.rect(self.screen,self.NODE_CREATED_COLOR,(self.space_x+x_block,40+self.space_y+y_block,self.width_block,self.width_block))
-      
+                pygame.draw.rect(self.screen, self.NODE_CREATED_COLOR, (self.space_x +
+                                 x_block, 40+self.space_y+y_block, self.width_block, self.width_block))
+
             sleep(self.time_animation)
         self.animation = False
-        
-    def updateInfoScreen(self,nodes_create,nodes_expanded,algorithm):   
-        if(algorithm=='a*'):
-            self.counter_nodes_expanded_star=nodes_expanded
-            self.counter_nodes_create_star=nodes_create
+
+    def updateInfoScreen(self, nodes_create, nodes_expanded, algorithm):
+        if (algorithm == 'a*'):
+            self.counter_nodes_expanded_star = nodes_expanded
+            self.counter_nodes_create_star = nodes_create
         else:
-            self.counter_nodes_expanded_bfs=nodes_expanded
-            self.counter_nodes_create_bfs=nodes_create
-                  
-    def initAlgorithm(self,algorithm,avoid_backing_out):
-        try:        
-            self.all_moviements=[]
-            ambiente =Agent(self.matriz,self.pos_agent,self.pos_churiken)        
+            self.counter_nodes_expanded_bfs = nodes_expanded
+            self.counter_nodes_create_bfs = nodes_create
+
+    def initAlgorithm(self, algorithm, avoid_backing_out):
+        try:
+            self.all_moviements = []
+            ambiente = Agent(self.matriz, self.pos_agent, self.pos_churiken)
             init_time = datetime.datetime.now()
-            if(algorithm=='a*'):
-                result = ambiente.aStar(avoid_backing_out,self.updateInfoScreen) 
+            if (algorithm == 'a*'):
+                result = ambiente.aStar(
+                    avoid_backing_out, self.updateInfoScreen)
             else:
-                result = ambiente.bfs(avoid_backing_out,self.updateInfoScreen) 
-                
+                result = ambiente.bfs(avoid_backing_out, self.updateInfoScreen)
+
             end_time = datetime.datetime.now()
-            node_winner:Node = result[0]
-            
+            node_winner: Node = result[0]
+
             self.all_moviements = result[3]
-            
-            if(algorithm=='a*'):
+
+            if (algorithm == 'a*'):
                 self.time_star = end_time-init_time
                 self.counter_costo_total_star = node_winner.cost_acumulated
-                
+
             else:
-                self.time_bfs =  end_time-init_time
+                self.time_bfs = end_time-init_time
                 self.counter_costo_total_bfs = node_winner.cost_acumulated
 
             route = []
             movements = []
-            parent_ = node_winner      
-            while parent_!=None:
-                route.insert(0,parent_.posAgente)
-                movements.insert(0,parent_.movement)
-                parent_ = parent_.parent 
-            #print(f' nodos expandidos: {result[1]} nodos_creados: {result[2]}  tiempo_empleado:{end_time-init_time} costo-total:{node_winner.cost_acumulated}')      
-            self.animationRoute(algorithm,movements,route[0])
+            parent_ = node_winner
+            while parent_ != None:
+                route.insert(0, parent_.posAgente)
+                movements.insert(0, parent_.movement)
+                parent_ = parent_.parent
+            # print(f' nodos expandidos: {result[1]} nodos_creados: {result[2]}  tiempo_empleado:{end_time-init_time} costo-total:{node_winner.cost_acumulated}')
+            self.animationRoute(algorithm, movements, route[0])
         except Exception as e:
             self.info_text = e
-        finally: 
-            self.animation=False
-   
-    def animationRoute(self,algorithm,movements,init_coordanate):
-        if algorithm=='a*':
-            self.clearGame()   
-            
+        finally:
+            self.animation = False
+
+    def animationRoute(self, algorithm, movements, init_coordanate):
+        if algorithm == 'a*':
+            self.clearGame()
+
         width = self.width_block/2
         x = init_coordanate[0]
         y = init_coordanate[1]
-        
-        route_color  = self.PURPLE_COLOR  if algorithm=='a*' else self.GREEN_COLOR
 
-        vector_route = pygame.Vector2(self.space_x+x*self.width_block+width,self.space_y+y*self.width_block+width)#ruta se le suma su mitad para que quede en el centro
-        vector_agent = pygame.Vector2(self.space_x+x*self.width_block,self.space_y+y*self.width_block)
-        
+        route_color = self.PURPLE_COLOR if algorithm == 'a*' else self.GREEN_COLOR
+
+        # ruta se le suma su mitad para que quede en el centro
+        vector_route = pygame.Vector2(
+            self.space_x+x*self.width_block+width, self.space_y+y*self.width_block+width)
+
+        vector_agent = pygame.Vector2(
+            self.space_x+x*self.width_block, self.space_y+y*self.width_block)
+
         frame_s = ceil(self.width_block)
 
-        
-        copy =  pygame.Surface.copy(pygame.Surface.subsurface(self.screen,(0,40,self.WIDTH,self.HEIGHT-140)))#copio el frame de la pantalla sin efecto
-        last_ = copy.copy()#guardo el ultimo frame generado donde no esta el agente, se hace para que no quede rastro del agente
+        copy = pygame.Surface.copy(pygame.Surface.subsurface(
+            # copio el frame de la pantalla sin efecto
+            self.screen, (0, 40, self.WIDTH, self.HEIGHT-140)))
+        # guardo el ultimo frame generado donde no esta el agente, se hace para que no quede rastro del agente
+        last_ = copy.copy()
         image_agent = self.agent_icon.copy()
         for i in movements:
-            for j in range(frame_s):#me muevo de 1 pixel hasta al tamaño total del cuadrado calculado previamente
-                aux =  pygame.Surface.copy(last_)      
-                if i=='R':      
-                    vector_route.x+=1  
-                    vector_agent.x+=1
+            # me muevo de 1 pixel hasta al tamaño total del cuadrado calculado previamente
+            for j in range(frame_s):
+                aux = pygame.Surface.copy(last_)
+                if i == 'R':
+                    vector_route.x += 1
+                    vector_agent.x += 1
                     image_agent = self.agent_icon_rigth
-             
-                if i=='L':
-                    vector_route.x-=1  
-                    vector_agent.x-=1
+
+                if i == 'L':
+                    vector_route.x -= 1
+                    vector_agent.x -= 1
                     image_agent = self.agent_icon_left
-                     
-                if i=='D':
-                    vector_route.y+=1
-                    vector_agent.y+=1
+
+                if i == 'D':
+                    vector_route.y += 1
+                    vector_agent.y += 1
                     image_agent = self.agent_icon_down
-                if i=='U':
-                    vector_route.y-=1
-                    vector_agent.y-=1
+                if i == 'U':
+                    vector_route.y -= 1
+                    vector_agent.y -= 1
                     image_agent = self.agent_icon_up
-                   
-                pygame.draw.circle(aux,route_color,vector_route,width/2)
+
+                pygame.draw.circle(aux, route_color, vector_route, width/2)
                 last_ = pygame.Surface.copy(aux)
-                aux.blit(image_agent,vector_agent)
-                self.screen.blit(aux,(0,40))
+                aux.blit(image_agent, vector_agent)
+                self.screen.blit(aux, (0, 40))
                 sleep(0.001)
-            rote=True
+            rote = True
 
-                
+        self.animation = True
 
-                  
-        self.animation = True     
-   
-    def run(self):       
-        self.screen = pygame.display.set_mode((self.WIDTH,self.HEIGHT)) 
-        self.screen_background = pygame.Surface.copy(pygame.Surface.subsurface(self.screen,(0,40,self.WIDTH,self.HEIGHT-140))) 
-        
+    def run(self):
+        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        self.screen_background = pygame.Surface.copy(
+            pygame.Surface.subsurface(self.screen, (0, 40, self.WIDTH, self.HEIGHT-140)))
+
         pygame.font.init()
-        pygame.display.set_caption('Proyecto 1 - IA - A* & BFS')  
-        
+        pygame.display.set_caption('Proyecto 1 - IA - A* & BFS')
+
         self.clock = pygame.time.Clock()
-        self.running = True       
-        
-        #elementos en la pantalla
+        self.running = True
+
+        # elementos en la pantalla
         self.putTextOnScreen()
-        #para que al precionar no se ejecute mas de 1 vez
+        # para que al precionar no se ejecute mas de 1 vez
         self.animation = False
         self.load_matriz = True
-        self.matriz_random =True
+        self.matriz_random = True
         self.loadMatrix('18x20_1_default')
         while self.running:
             for event in pygame.event.get():
-                if(event.type==pygame.QUIT):
-                   self.running=False 
-            
-            self.putTextOnScreen()          
-                           
-            if not self.animation and self.info_matrix is not None and  pygame.key.get_pressed()[pygame.K_a]:#ejecutar A*
+                if (event.type == pygame.QUIT):
+                    self.running = False
+
+            self.putTextOnScreen()
+
+            # ejecutar A*
+            if not self.animation and self.info_matrix is not None and pygame.key.get_pressed()[pygame.K_a]:
+                self.animation = True
                 self.clearGame()
-                self.thread_astar =  threading.Thread(target=self.initAlgorithm,args=('a*',True))#para demasiados estado es optimo no reccorrer nodos que ya han sido expandido, pero compromete la completitud de algoritmo
+                # para demasiados estado es optimo no reccorrer nodos que ya han sido expandido, pero compromete la completitud de algoritmo
+                self.thread_astar = threading.Thread(
+                    target=self.initAlgorithm, args=('a*', True))
                 self.thread_astar.start()
-                self.animation=True
-            
-            if not self.animation and len(self.all_moviements)>0 and pygame.key.get_pressed()[pygame.K_s]:#animacion
+
+            # animacion
+            if not self.animation and len(self.all_moviements) > 0 and pygame.key.get_pressed()[pygame.K_s]:
+                self.animation = True
                 self.clearGame()
-                h =  threading.Thread(target=self.animationExpanded,args=(self.all_moviements,))
-                h.start()               
-                self.animation=True
- 
-            if not self.animation and self.info_matrix is not None and pygame.key.get_pressed()[pygame.K_d]:# ejecutar BFS
-                self.thread_bfs =  threading.Thread(target=self.initAlgorithm,args=('bfs',True))
+                h = threading.Thread(
+                    target=self.animationExpanded, args=(self.all_moviements,))
+                h.start()
+
+            # ejecutar BFS
+            if not self.animation and self.info_matrix is not None and pygame.key.get_pressed()[pygame.K_d]:
+                self.animation = True
+                self.thread_bfs = threading.Thread(
+                    target=self.initAlgorithm, args=('bfs', True))
                 self.thread_bfs.start()
-                self.animation=True
-                
-            if  self.animation  and pygame.key.get_pressed()[pygame.K_e]:#aumentar  la velocidadee
-                aux= self.time_animation-0.001
-                if(aux>=0.001):
-                    self.time_animation=aux
-                               
-            if self.animation and self.time_animation<1  and pygame.key.get_pressed()[pygame.K_q]:#realentizar la velocidad
-                self.time_animation+=0.001
-                
-            
-            
+
+            # aumentar  la velocidadee
+            if self.animation and pygame.key.get_pressed()[pygame.K_e]:
+                aux = self.time_animation-0.001
+                if (aux >= 0.001):
+                    self.time_animation = aux
+
+            # realentizar la velocidad
+            if self.animation and self.time_animation < 1 and pygame.key.get_pressed()[pygame.K_q]:
+                self.time_animation += 0.001
+
             if not self.animation and self.load_matriz and pygame.key.get_pressed()[pygame.K_l]:
                 self.load_matriz = False
-                self.loadMatrix('matriz1')
+                self.loadMatrix('5x5_3223_T')
                 self.clearTexts()
-                
-            if not self.animation and self.matriz_random and pygame.key.get_pressed()[pygame.K_r]:#generar matriz random al presionar r
-                self.all_moviements=[]
+
+            # generar matriz random al presionar r
+            if not self.animation and self.matriz_random and pygame.key.get_pressed()[pygame.K_r]:
+                self.all_moviements = []
                 matriz_name = generatorMatrizGame()
-                self.info_matrix = matriz_name.split('_')[0]                
-                self.loadMatrix(matriz_name) 
+                self.info_matrix = matriz_name.split('_')[0]
+                self.loadMatrix(matriz_name)
                 self.clearTexts()
-                
-                
-                self.matriz_random=False         
+
+                self.matriz_random = False
+
                 def can_load_matriz():
                     sleep(1)
-                    self.matriz_random  =True 
+                    self.matriz_random = True
                 threading.Thread(target=can_load_matriz).start()
-                           
+
             if not self.animation and pygame.key.get_pressed()[pygame.K_c]:
                 self.clearGame()
                 self.clearTexts()
-           
-            pygame.display.flip()#muestra la ventana aqui
+
+            pygame.display.flip()  # muestra la ventana aqui
             self.clock.tick(60)
         pygame.quit()
         exit()
-        
-if __name__ =='__main__':
-    gui =GUI2(WIDTH,HEIGHT)
-    
+
+
+if __name__ == '__main__':
+    gui = GUI2(WIDTH, HEIGHT)
