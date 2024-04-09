@@ -7,15 +7,16 @@ from helpers.generatorMatrices import generatorMatrizGame
 from math import ceil, floor
 import datetime
 from Agent import Agent
-from os import path
+from os import path, environ
 
+from InputMatrizModal import InputMatrizModal
 
 WIDTH = 1070
 HEIGHT = 700
 
 
-class GUI2:
-    def __init__(self, width, heigth) -> None:
+class GUI:
+    def __init__(self, width, heigth, inputMatrizModal) -> None:
         # constantes
         self.WIDTH = width
         self.HEIGHT = heigth
@@ -28,19 +29,18 @@ class GUI2:
         self.BACKGROUND_COLOR = (72, 67, 64)
         self.NODE_EXPANDED_COLOR = (63, 212, 255)
         self.NODE_CREATED_COLOR = (253, 255, 44)
-
         #
         self.all_moviements = []
         self.matriz = None
         self.dimention_y_used = self.HEIGHT
         self.dimention_x_used = self.HEIGHT
         self.time_animation = 0.01
-
         # informacion de cada algoritmo para mostrar en patalla
         self.counter_nodes_create_star = 0
         self.counter_nodes_expanded_star = 0
         self.counter_costo_total_star = 0
         self.time_star = ''
+        self.inputMatrizModal: InputMatrizModal = inputMatrizModal
 
         self.counter_nodes_create_bfs = 0
         self.counter_nodes_expanded_bfs = 0
@@ -52,7 +52,7 @@ class GUI2:
         self.info_matrix = ''
         self.run()
 
-    def loadMatrix(self, name):
+    def loadMatrix(self, name: str):
         # cargo la matriz especificada, debe existir en la carpeta "matrices"
         try:
             with open(path.join(path.dirname(__file__), f'matrices/{name}.txt')) as file:
@@ -75,6 +75,8 @@ class GUI2:
             self.mappingMatrizOnScreen()  # defino el tamano del juego en base a la matrix leida
         except FileNotFoundError as e:
             self.info_text = 'La matriz no existe'
+        finally:
+            self.load_matriz = True
 
     def calculateScreen(self):
         # obtengo las dimensiones de la matriz para calcular su posicion en la pantalla
@@ -457,6 +459,7 @@ class GUI2:
         self.animation = True
 
     def run(self):
+        environ['SDL_VIDEO_WINDOW_POS'] = '1'  # centrar ventana
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.screen_background = pygame.Surface.copy(
             pygame.Surface.subsurface(self.screen, (0, 40, self.WIDTH, self.HEIGHT-140)))
@@ -495,13 +498,14 @@ class GUI2:
             if not self.animation and len(self.all_moviements) > 0 and pygame.key.get_pressed()[pygame.K_s]:
                 self.animation = True
                 self.clearGame()
-                h = threading.Thread(
+                self.thread_animation = threading.Thread(
                     target=self.animationExpanded, args=(self.all_moviements,))
-                h.start()
+                self.thread_animation.start()
 
             # ejecutar BFS
             if not self.animation and self.info_matrix is not None and pygame.key.get_pressed()[pygame.K_d]:
                 self.animation = True
+                self.clearGame()
                 self.thread_bfs = threading.Thread(
                     target=self.initAlgorithm, args=('bfs', True))
                 self.thread_bfs.start()
@@ -516,12 +520,16 @@ class GUI2:
             if self.animation and self.time_animation < 1 and pygame.key.get_pressed()[pygame.K_q]:
                 self.time_animation += 0.001
 
+            # cargar matriz
             if not self.animation and self.load_matriz and pygame.key.get_pressed()[pygame.K_l]:
                 self.load_matriz = False
-                self.loadMatrix('18x20_1_default')
                 self.clearTexts()
+                name_matriz = self.inputMatrizModal.openModal()
+                if (name_matriz is not None):
+                    self.loadMatrix(name_matriz)
+                else:
+                    self.load_matriz = True
 
-            # generar matriz random al presionar r
             if not self.animation and self.matriz_random and pygame.key.get_pressed()[pygame.K_r]:
                 self.all_moviements = []
                 matriz_name = generatorMatrizGame()
@@ -538,7 +546,6 @@ class GUI2:
             if not self.animation and pygame.key.get_pressed()[pygame.K_c]:
                 self.clearGame()
                 self.clearTexts()
-
             pygame.display.flip()  # muestra la ventana aqui
             self.clock.tick(60)
         pygame.quit()
@@ -546,4 +553,5 @@ class GUI2:
 
 
 if __name__ == '__main__':
-    gui = GUI2(WIDTH, HEIGHT)
+    inputMatrizModal = InputMatrizModal()
+    gui = GUI(WIDTH, HEIGHT, inputMatrizModal)
