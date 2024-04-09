@@ -10,8 +10,8 @@ from Agent import Agent
 from os import path
 
 
-WIDTH = 1100
-HEIGHT = 750
+WIDTH = 1070
+HEIGHT = 700
 
 
 class GUI2:
@@ -100,7 +100,7 @@ class GUI2:
         # genero copias de las rotaciones del icono
         self.agent_icon_up = pygame.transform.rotate(self.agent_icon, 0)
         self.agent_icon_left = pygame.transform.rotate(self.agent_icon, 90)
-        self.agent_icon_rigth = pygame.transform.rotate(self.agent_icon, 280)
+        self.agent_icon_right = pygame.transform.rotate(self.agent_icon, 270)
         self.agent_icon_down = pygame.transform.rotate(self.agent_icon, 180)
 
     def mappingMatrizOnScreen(self):
@@ -475,7 +475,7 @@ class GUI2:
         self.matriz_random = True
         self.loadMatrix('18x20_1_default')
         while self.running:
-            print(self.animation)
+
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT):
                     self.running = False
