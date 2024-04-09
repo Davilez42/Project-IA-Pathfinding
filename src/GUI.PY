@@ -431,7 +431,7 @@ class GUI2:
                 if i == 'R':
                     vector_route.x += 1
                     vector_agent.x += 1
-                    image_agent = self.agent_icon_rigth
+                    image_agent = self.agent_icon_right
 
                 if i == 'L':
                     vector_route.x -= 1
