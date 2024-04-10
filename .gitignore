@@ -1,5 +1,5 @@
 /src/matrices/*R.txt
-/src/__pycache__
 /env
+/src/__pycache__
+/src/helpers/__pycache__
 .vscode
-/__pycache__
