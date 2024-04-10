@@ -4,13 +4,12 @@ from os import path
 
 
 def generatorMatrizGame() -> str:
-    r = 50
-    c = 50
+    d = randint(5, 50)
     objects = ['V', 'H']
     matrix = []
-    for i in range(r):
+    for i in range(d):
         row = []
-        for j in range(c):
+        for j in range(d):
             pro = randint(0, 100)
             if pro < 30:
                 row.append('X')
@@ -20,10 +19,10 @@ def generatorMatrizGame() -> str:
                 row.append('1')
         matrix.append(row)
 
-    matrix[randint(0, r-1)][randint(0, c-1)] = '*'
-    matrix[randint(0, r-1)][randint(0, c-1)] = '@'
+    matrix[randint(0, d-1)][randint(0, d-1)] = '*'
+    matrix[randint(0, d-1)][randint(0, d-1)] = '@'
     date_creaion = datetime.now().microsecond
-    name = f'{r}x{c}_{str(date_creaion)}_R'
+    name = f'{d}x{d}_{str(date_creaion)}_R'
     with open(path.join(path.dirname(__file__), f'../matrices/{name}.txt'), 'w') as file:
         for row in matrix:
             row_str = ''
