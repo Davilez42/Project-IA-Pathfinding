@@ -55,7 +55,7 @@ class GUI:
     def loadMatrix(self, name: str):
         # cargo la matriz especificada, debe existir en la carpeta "matrices"
         try:
-            with open(path.join(path.dirname(__file__), f'matrices/{name}.txt')) as file:
+            with open(path.join(path.dirname(__file__), 'matrices', f'{name}.txt')) as file:
                 matriz_ = []
                 for i, r in enumerate(file.readlines()):
                     row: str = r.replace('\n', '')
@@ -96,7 +96,9 @@ class GUI:
         self.space_y = (self.HEIGHT-140 - self.dimention_y_used)/2
 
         # cargo y redimensiono el icono de navegacion
-        self.agent_icon = pygame.image.load('./src/icons/navigation.png')
+        self.agent_icon = pygame.image.load(
+            path.join(path.dirname(__file__), 'icons', 'navigation.png'))
+
         self.agent_icon = pygame.transform.scale(
             self.agent_icon, (self.width_block, self.width_block))
         # genero copias de las rotaciones del icono
