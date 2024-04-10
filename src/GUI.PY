@@ -8,8 +8,16 @@ from math import ceil, floor
 import datetime
 from Agent import Agent
 from os import path, environ
-
 from InputMatrizModal import InputMatrizModal
+
+
+"""
+Autores:
+Oscar Fernando Rivera Pardo 
+Jose David Suarez Cardona
+Jeferson Aguiar Dominguez
+"""
+
 
 WIDTH = 1070
 HEIGHT = 700
