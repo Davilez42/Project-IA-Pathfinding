@@ -9,5 +9,5 @@ instalacion y ejecucion del proyecto
 ```bash
   pip install -r requirements.txt
   cd src
-  ejecutar GUI.py
+  python GUI.py
 ```
