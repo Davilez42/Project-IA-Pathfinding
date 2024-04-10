@@ -505,7 +505,6 @@ class GUI:
             # ejecutar BFS
             if not self.animation and self.info_matrix is not None and pygame.key.get_pressed()[pygame.K_d]:
                 self.animation = True
-                self.clearGame()
                 self.thread_bfs = threading.Thread(
                     target=self.initAlgorithm, args=('bfs', True))
                 self.thread_bfs.start()
