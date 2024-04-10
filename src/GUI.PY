@@ -454,7 +454,6 @@ class GUI:
                 aux.blit(image_agent, vector_agent)
                 self.screen.blit(aux, (0, 40))
                 sleep(0.001)
-            rote = True
 
         self.animation = True
 
