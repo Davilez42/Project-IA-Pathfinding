@@ -4,8 +4,8 @@ from os import path
 
 
 def generatorMatrizGame() -> str:
-    r = 20
-    c = 20
+    r = 50
+    c = 50
     objects = ['V', 'H']
     matrix = []
     for i in range(r):
