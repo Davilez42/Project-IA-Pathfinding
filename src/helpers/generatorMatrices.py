@@ -3,7 +3,7 @@ from datetime import datetime
 from os import path
 
 
-def generatorMatrizGame() -> str:
+def generateMatrixGame() -> str:
     d = randint(5, 50)
     objects = ['V', 'H']
     matrix = []
@@ -21,8 +21,8 @@ def generatorMatrizGame() -> str:
 
     matrix[randint(0, d-1)][randint(0, d-1)] = '*'
     matrix[randint(0, d-1)][randint(0, d-1)] = '@'
-    date_creaion = datetime.now().microsecond
-    name = f'{d}x{d}_{str(date_creaion)}_R'
+    creation_time = datetime.now().microsecond
+    name = f'{d}x{d}_{str(creation_time)}_R'
     with open(path.join(path.dirname(__file__), f'../matrices/{name}.txt'), 'w') as file:
         for row in matrix:
             row_str = ''

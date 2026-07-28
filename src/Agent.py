@@ -1,7 +1,6 @@
-
-import numpy as np
-from Node import Node
 from queue import Queue
+
+from Node import Node
 
 
 class Agent:
@@ -11,8 +10,9 @@ class Agent:
         self.pos_agent = pos_agent
 
     def bfs(self, avoid_backing_out, updateInfoScreen):
-        inital_node = Node(self.init_matrix.copy(),
-                           self.pos_agent, self.pos_target, 0, None, None)
+        inital_node = Node(
+            self.init_matrix.copy(), self.pos_agent, self.pos_target, 0, None, None
+        )
         nodes_expanded = 0
         nodes_created = 0
         queue: Queue = Queue(maxsize=-1)
@@ -20,38 +20,45 @@ class Agent:
         positions_explored = []
         all_movements = []
         while not queue.empty():
-            updateInfoScreen(nodes_created, nodes_expanded, 'bfs')
+            updateInfoScreen(nodes_created, nodes_expanded, "bfs")
 
             current_node: Node = queue.get()
 
-            # si esta activado el evitar devolvsere verifico si el nodo ya ha sido expandido de esta manera evito expandir los mismo nodos
-            if (current_node.posAgente in positions_explored and avoid_backing_out):
+            # When backtracking prevention is enabled, skip nodes that were already expanded.
+            if current_node.agent_pos in positions_explored and avoid_backing_out:
                 continue
 
-            if (current_node.meta()):
+            if current_node.meta():
                 return current_node, nodes_expanded, nodes_created, all_movements
 
-            if avoid_backing_out:  # llevo un registro de los nodos expandidos para no volver a expandirlo en caso de que este activada
-                positions_explored.append(current_node.posAgente)
+            if avoid_backing_out:
+                positions_explored.append(current_node.agent_pos)
 
             nodes_expanded += 1
-            all_movements.append((current_node.posAgente, True))
+            all_movements.append((current_node.agent_pos, True))
 
-            # genero los hijos en el orden de las manecillas del reloj arriba,derecha, abajo, izquierda
-            childs = [current_node.up(), current_node.right(),
-                      current_node.down(), current_node.left()]
+            # Generate children clockwise: up, right, down, left.
+            childs = [
+                current_node.up(),
+                current_node.right(),
+                current_node.down(),
+                current_node.left(),
+            ]
 
             for child in childs:
-                if (isinstance(child, Node) and not (child.posAgente in positions_explored)):
-                    all_movements.append((child.posAgente, False))
+                if isinstance(child, Node) and not (
+                    child.agent_pos in positions_explored
+                ):
+                    all_movements.append((child.agent_pos, False))
                     nodes_created += 1
                     queue.put(child)
 
-        raise Exception('Sin solucion')
+        raise Exception("No solution")
 
     def aStar(self, avoid_backing_out, updateInfoScreen):
-        inital_node = Node(self.init_matrix.copy(),
-                           self.pos_agent, self.pos_target, 0, None, None)
+        inital_node = Node(
+            self.init_matrix.copy(), self.pos_agent, self.pos_target, 0, None, None
+        )
         inital_node.calculate_f()
         nodes_expanded = 0
         nodes_created = 0
@@ -60,9 +67,9 @@ class Agent:
         all_movements = []
 
         while len(queue) > 0:
-            updateInfoScreen(nodes_created, nodes_expanded, 'a*')
+            updateInfoScreen(nodes_created, nodes_expanded, "a*")
 
-            _f = float('inf')
+            _f = float("inf")
             node_min = None
             for node in queue:
                 if node.f <= _f:
@@ -71,42 +78,43 @@ class Agent:
             queue.remove(node_min)
             current_node: Node = node_min
 
-            if (current_node.meta()):
+            if current_node.meta():
                 return current_node, nodes_expanded, nodes_created, all_movements
 
-            if avoid_backing_out:  # llevo un registro de los nodos visitidados para no volver a visitarlos
-                positions_explored.append(current_node.posAgente)
+            if avoid_backing_out:
+                positions_explored.append(current_node.agent_pos)
 
             nodes_expanded += 1
-            all_movements.append((current_node.posAgente, True))
+            all_movements.append((current_node.agent_pos, True))
 
-            # genero los hijos en el orden de las manesillas del reloj arriba,derecha, abajo, izquierda
-            childs = [current_node.up(), current_node.right(),
-                      current_node.down(), current_node.left()]
+            # Generate children clockwise: up, right, down, left.
+            childs = [
+                current_node.up(),
+                current_node.right(),
+                current_node.down(),
+                current_node.left(),
+            ]
 
             for child in childs:
-                # en caso de que sea None lo evito ya que no es un Nodo
-                if (not isinstance(child, Node)):
+                # Skip invalid movements.
+                if not isinstance(child, Node):
                     continue
 
-                child.calculate_f()  # calculo el f del hijo
+                child.calculate_f()
 
                 create = True
 
-                # verifico si ya ha sido creado ese hijo buscandolo en la cola
+                # If the node already exists in the open list, keep the cheaper path.
                 for i, node in enumerate(queue):
-                    if node.posAgente == child.posAgente:
-                        # si ya existe ese nodo  verifico los costes acumulados de ambos nodos, en caso de que el actual nodo creado
-                        # tenga menor costo acumulado significa la ruta actual del nodo es mejor
-                        if child.cost_acumulated < node.cost_acumulated:
-                            # remplazo al nodo que mejora la ruta
+                    if node.agent_pos == child.agent_pos:
+                        if child.cost_accumulated < node.cost_accumulated:
                             queue[i] = child
                         create = False
                         break
 
-                if create and child.posAgente not in positions_explored:
-                    all_movements.append((child.posAgente, False))
+                if create and child.agent_pos not in positions_explored:
+                    all_movements.append((child.agent_pos, False))
                     nodes_created += 1
                     queue.append(child)
 
-        raise Exception('Sin solucion')
+        raise Exception("No solution")
