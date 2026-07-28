@@ -1,4 +1,4 @@
-# A* and BFS Pathfinding Visualizer
+# A\* and BFS Pathfinding Visualizer
 
 A Python pathfinding visualizer built with Pygame. The project compares **A\*** and **Breadth-First Search (BFS)** on grid-based maps with obstacles, directional barriers, animations, and runtime metrics.
 
@@ -6,7 +6,7 @@ The goal is to make classic AI search algorithms easier to inspect: how many nod
 
 ## Features
 
-- Visual comparison between A* and BFS.
+- Visual comparison between A\* and BFS.
 - Animated path rendering for the selected algorithm.
 - Optional animation of created and expanded nodes.
 - Built-in matrix files for different map sizes.
@@ -16,25 +16,13 @@ The goal is to make classic AI search algorithms easier to inspect: how many nod
 
 ## Screenshots and GIFs
 
-Save screenshots or GIFs in `docs/images/` and uncomment the matching image link.
+### A* Search
 
-### Default Matrix
+![A* pathfinding demo](docs/images/astar.gif)
 
-<!--
-![Default matrix](docs/images/default-matrix.png)
--->
+### Breadth-First Search
 
-### A* vs BFS
-
-<!--
-![A* and BFS pathfinding](docs/images/pathfinding-demo.gif)
--->
-
-### Expanded Nodes
-
-<!--
-![Expanded nodes animation](docs/images/expanded-nodes.gif)
--->
+![BFS pathfinding demo](docs/images/bfs.gif)
 
 ## Installation
 
@@ -76,7 +64,7 @@ The app starts with the default matrix `18x20_1_default`.
 
 ## Controls
 
-- `A`: run A*.
+- `A`: run A\*.
 - `D`: run BFS.
 - `S`: animate created and expanded nodes after running an algorithm.
 - `R`: generate and load a random matrix.
@@ -108,9 +96,9 @@ The agent moves in four directions: up, right, down, and left. Movement cost is 
 
 ## Algorithms
 
-### A*
+### A\*
 
-A* uses the accumulated path cost plus a Manhattan-distance heuristic:
+A\* uses the accumulated path cost plus a Manhattan-distance heuristic:
 
 ```text
 f(n) = g(n) + h(n)
@@ -159,7 +147,7 @@ Represents a state in the search tree. It stores the matrix, current agent posit
 Important methods:
 
 - `heuristics()`: returns Manhattan distance.
-- `calculate_f()`: computes the A* score.
+- `calculate_f()`: computes the A\* score.
 - `up()`, `right()`, `down()`, `left()`: generate valid neighboring states.
 - `meta()`: checks whether the current node reached the target.
 
@@ -174,5 +162,5 @@ The GUI delegates pathfinding to `Agent`, then reconstructs the final route by w
 - Change animation speed defaults in `GUI.__init__()`.
 - Add or edit maps in `src/matrices/`.
 - Adjust random map generation in `helpers/generatorMatrices.py`.
-- Change the A* heuristic in `Node.heuristics()`.
+- Change the A\* heuristic in `Node.heuristics()`.
 - Replace the open-list selection in `Agent.aStar()` with `heapq` if you want a more efficient implementation.
